@@ -24,6 +24,12 @@ variable "keypath" {
   description = "ssh key path"
 }
 
+variable "pem" {
+  type        = string
+  default     = "~/.ssh/id_rsa"
+  description = "ssh private key"
+}
+
 variable "vm_qty" {
   type        = string
   default     = "2"
