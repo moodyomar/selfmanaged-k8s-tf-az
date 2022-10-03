@@ -1,15 +1,16 @@
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "myVM"
+  name                = "myVM${count.index}"
+  count               = var.vm_qty
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   size                = var.vm_size
-  admin_username      = var.username
+  admin_username      = "${var.username}${count.index}"
   network_interface_ids = [
-    azurerm_network_interface.nic.id,
+    element(azurerm_network_interface.nic.*.id, count.index),
   ]
 
   admin_ssh_key {
-    username   = var.username
+    username   = "${var.username}${count.index}"
     public_key = file(var.keypath)
   }
 

@@ -36,20 +36,22 @@ resource "azurerm_subnet" "sb" {
 }
 
 resource "azurerm_network_interface" "nic" {
-  name                = "myNIC"
+  name                = "myNIC${count.index}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+  count               = var.vm_qty
 
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.sb.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.ip.id
+    public_ip_address_id          = element(azurerm_public_ip.ip.*.id, count.index)
   }
 }
 
 resource "azurerm_public_ip" "ip" {
-  name                = "myPublicIP"
+  name                = "myPublicIP${count.index}"
+  count               = var.vm_qty
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   allocation_method   = "Static"

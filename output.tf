@@ -4,6 +4,6 @@ output "rg" {
 }
 
 output "public_ip" {
-  value       = azurerm_public_ip.ip.ip_address
+  value       = azurerm_public_ip.ip.*.id
   description = "Public IP Adress"
 }

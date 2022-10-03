@@ -24,3 +24,9 @@ variable "keypath" {
   description = "ssh key path"
 }
 
+variable "vm_qty" {
+  type        = string
+  default     = "2"
+  description = "VMs Qunatity"
+}
+
