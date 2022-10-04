@@ -1,8 +1,8 @@
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "myVM${count.index}"
+  name                = "${var.vm_name}${count.index}"
   count               = var.vm_qty
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = var.rg_name
+  location            = var.region
   size                = var.vm_size
   admin_username      = "${var.username}${count.index}"
   network_interface_ids = [
@@ -35,18 +35,14 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   provisioner "remote-exec" {
     inline = [
-      "wget https://gist.github.com/moodyomar/8baed3dd0a2c774066989a2f859657c3/raw/543abc0ef8c339ede2b2101f7a08502ff3d7f309/intimater.sh",
-      "wget https://gist.github.com/moodyomar/afe0ca0b354dd9278f3b3d58ac38e568/raw/c1547797a918719aeddb726d2b42794e3cc3378f/initnode.sh",
-      "chmod +x intimater.sh",
-      "chmod +x initnode.sh",
+      "wget ${var.master_script} && chmod +x intimater.sh",
+      "wget ${var.node_script} && chmod +x initnode.sh",
       "./intimater.sh",
     ]
   }
 
-#   provisioner "local-exec" {
-#     command = "ssh -i "${var.pem}" ${var.username}@${element(azurerm_public_ip.ip.*.ip_address, count.index)}"
-#   }
-
-
+  #  open new Terminal window on mac and run an SSH command in it to the server(s)
+  provisioner "local-exec" {
+    command = "osascript -e 'tell app \"Terminal\" to do script \"ssh -o StrictHostKeyChecking=no -i '${var.pem}' ${var.username}${count.index}@${element(azurerm_public_ip.ip.*.ip_address, count.index)}\"'"
+  }
 }
-

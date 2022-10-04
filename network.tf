@@ -1,17 +1,17 @@
 # Create a virtual network within the resource group
 resource "azurerm_virtual_network" "network" {
-  name                = "my-network"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  name                = var.network_name
+  resource_group_name = var.rg_name
+  location            = var.region
   address_space       = ["12.0.0.0/16"]
 }
 
 resource "azurerm_network_security_group" "sg" {
-  name                = "mySg"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  name                = var.sg_name
+  resource_group_name = var.rg_name
+  location            = var.region
 
-security_rule {
+  security_rule {
     name                       = "SSH"
     priority                   = 100
     direction                  = "Inbound"
@@ -23,7 +23,7 @@ security_rule {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "Kubernetes API server"
     priority                   = 101
     direction                  = "Inbound"
@@ -35,7 +35,7 @@ security_rule {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "Kubelet API"
     priority                   = 102
     direction                  = "Inbound"
@@ -47,7 +47,7 @@ security_rule {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "kube-scheduler"
     priority                   = 103
     direction                  = "Inbound"
@@ -59,7 +59,7 @@ security_rule {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "kube-controller-manager"
     priority                   = 104
     direction                  = "Inbound"
@@ -71,7 +71,7 @@ security_rule {
     destination_address_prefix = "*"
   }
 
-    security_rule {
+  security_rule {
     name                       = "etcd server client API"
     priority                   = 105
     direction                  = "Inbound"
@@ -89,16 +89,16 @@ security_rule {
 }
 
 resource "azurerm_subnet" "sb" {
-  name                 = "mySubnet"
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.network.name
+  name                 = var.subnet_name
+  resource_group_name  = var.rg_name
+  virtual_network_name = var.network_name
   address_prefixes     = ["12.0.2.0/24"]
 }
 
 resource "azurerm_network_interface" "nic" {
-  name                = "myNIC${count.index}"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  name                = "${var.nic_name}${count.index}"
+  resource_group_name = var.rg_name
+  location            = var.region
   count               = var.vm_qty
 
   ip_configuration {
@@ -110,10 +110,10 @@ resource "azurerm_network_interface" "nic" {
 }
 
 resource "azurerm_public_ip" "ip" {
-  name                = "myPublicIP${count.index}"
+  name                = "${var.ip_name}${count.index}"
   count               = var.vm_qty
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = var.rg_name
+  location            = var.region
   allocation_method   = "Static"
 
   tags = {
