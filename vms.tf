@@ -35,8 +35,9 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   provisioner "remote-exec" {
     inline = [
-      "wget ${var.master_script} && chmod +x intimater.sh",
-      "wget ${var.node_script} && chmod +x initnode.sh",
+      "${var.get_master_script}",
+      "${var.get_node_script}",
+      "${var.apply_aliases}",
       "./intimater.sh",
     ]
   }

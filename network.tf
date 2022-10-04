@@ -1,15 +1,15 @@
 # Create a virtual network within the resource group
 resource "azurerm_virtual_network" "network" {
   name                = var.network_name
-  resource_group_name = var.rg_name
-  location            = var.region
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   address_space       = ["12.0.0.0/16"]
 }
 
 resource "azurerm_network_security_group" "sg" {
   name                = var.sg_name
-  resource_group_name = var.rg_name
-  location            = var.region
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
     name                       = "SSH"
@@ -90,15 +90,15 @@ resource "azurerm_network_security_group" "sg" {
 
 resource "azurerm_subnet" "sb" {
   name                 = var.subnet_name
-  resource_group_name  = var.rg_name
-  virtual_network_name = var.network_name
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.network.name
   address_prefixes     = ["12.0.2.0/24"]
 }
 
 resource "azurerm_network_interface" "nic" {
   name                = "${var.nic_name}${count.index}"
-  resource_group_name = var.rg_name
-  location            = var.region
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
   count               = var.vm_qty
 
   ip_configuration {
@@ -112,8 +112,8 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_public_ip" "ip" {
   name                = "${var.ip_name}${count.index}"
   count               = var.vm_qty
-  resource_group_name = var.rg_name
-  location            = var.region
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
   allocation_method   = "Static"
 
   tags = {

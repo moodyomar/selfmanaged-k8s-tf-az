@@ -32,19 +32,24 @@ variable "pem" {
 
 variable "vm_qty" {
   type        = string
-  default     = "3"
+  default     = "2"
   description = "VMs Qunatity"
 }
 
-variable "master_script" {
+variable "get_master_script" {
   type        = string
-  default     = "https://gist.github.com/moodyomar/8baed3dd0a2c774066989a2f859657c3/raw/543abc0ef8c339ede2b2101f7a08502ff3d7f309/intimater.sh"
+  default     = "wget https://gist.github.com/moodyomar/8baed3dd0a2c774066989a2f859657c3/raw/543abc0ef8c339ede2b2101f7a08502ff3d7f309/intimater.sh && chmod +x intimater.sh"
   description = "init master script for k8s"
 }
 
-variable "node_script" {
+variable "get_node_script" {
   type        = string
-  default     = "https://gist.github.com/moodyomar/afe0ca0b354dd9278f3b3d58ac38e568/raw/c1547797a918719aeddb726d2b42794e3cc3378f/initnode.sh"
+  default     = "wget https://gist.github.com/moodyomar/afe0ca0b354dd9278f3b3d58ac38e568/raw/c1547797a918719aeddb726d2b42794e3cc3378f/initnode.sh && chmod +x initnode.sh"
+  description = "init node script for k8s"
+}
+variable "apply_aliases" {
+  type        = string
+  default     = "wget https://gist.github.com/moodyomar/b95f9cc09d90581f19caa9295b874b53/raw/607573858498829b7489a53d594b91391047717e/.bash_aliases"
   description = "init node script for k8s"
 }
 
