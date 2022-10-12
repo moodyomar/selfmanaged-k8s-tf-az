@@ -1,0 +1,13 @@
+[master]
+master ansible_host=${k8s_master} ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+
+[workers]
+worker ansible_host=${k8s_worker} 
+
+[master:vars]
+ansible_user=${vm_user}
+master_ip=${k8s_master}
+
+[workers:vars]
+ansible_user=${vm_user} 
+worker_ip=${k8s_worker}

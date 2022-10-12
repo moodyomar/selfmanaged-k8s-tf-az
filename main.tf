@@ -18,3 +18,12 @@ resource "azurerm_resource_group" "rg" {
   location = var.region
 }
 
+resource "local_file" "AnsibleInventory" {
+ content = templatefile("inventory.tmpl",
+    {
+        vm_user = var.username,
+        k8s_master = azurerm_public_ip.ip[0].ip_address,
+        k8s_worker = azurerm_public_ip.ip[1].ip_address,
+    })
+    filename = "./Ansible/inventory"
+}
