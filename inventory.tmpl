@@ -1,13 +1,17 @@
-[master]
+[K8Smaster]
 master ansible_host=${k8s_master} ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
 
-[workers]
-worker ansible_host=${k8s_worker} 
+[K8Sworkers]
+%{ for count,worker in k8s_workers ~}
+worker-${count} ansible_host=${worker} ansible_ssh_extra_args='-o StrictHostKeyChecking=no' 
+%{ endfor ~}
 
-[master:vars]
-ansible_user=${vm_user}
+[K8Smaster:vars]
+ansible_user=${k8s_usr}0
 master_ip=${k8s_master}
 
-[workers:vars]
-ansible_user=${vm_user} 
-worker_ip=${k8s_worker}
+[K8Sworkers:vars]
+%{ for count,worker in k8s_workers ~}
+ansible_user=${k8s_usr}${count}
+worker_ip=${worker}
+%{ endfor ~}

@@ -26,7 +26,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 
-
   #  open new Terminal window on mac and run an SSH command in it to the server(s)
   # provisioner "local-exec" {
   #   command = "osascript -e 'tell app \"Terminal\" to do script \"ssh -o StrictHostKeyChecking=no -i '${var.pem}' ${var.username}${count.index}@${element(azurerm_public_ip.ip.*.ip_address, count.index)}\"'"

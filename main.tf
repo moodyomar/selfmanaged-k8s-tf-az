@@ -21,9 +21,9 @@ resource "azurerm_resource_group" "rg" {
 resource "local_file" "AnsibleInventory" {
  content = templatefile("inventory.tmpl",
     {
-        vm_user = var.username,
         k8s_master = azurerm_public_ip.ip[0].ip_address,
-        k8s_worker = azurerm_public_ip.ip[1].ip_address,
+        k8s_usr = var.username,
+        k8s_workers = flatten([for i in azurerm_public_ip.ip[*].ip_address:i])
     })
     filename = "./Ansible/inventory"
 }
