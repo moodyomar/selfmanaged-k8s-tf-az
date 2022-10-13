@@ -117,6 +117,30 @@ resource "azurerm_public_ip" "ip" {
   allocation_method   = "Static"
 
   tags = {
-    environment = "Production"
+    environment = "Worker"
+  }
+}
+
+# Master Network Resources
+resource "azurerm_network_interface" "Masternic" {
+  name                = var.nic_name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.sb.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.Masterip.id
+  }
+}
+resource "azurerm_public_ip" "Masterip" {
+  name                = var.ip_name
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  allocation_method   = "Static"
+
+  tags = {
+    environment = "Master"
   }
 }
