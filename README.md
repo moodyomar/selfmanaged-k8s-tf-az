@@ -1,4 +1,4 @@
-# Terraform Azure Bare Metal Kubernetes
+# Bare Metal K8S Cluster on Azure with Terraform and Ansible
 
 Provisioning of a bare metal K8S cluster with Terraform on Azure
 
