@@ -29,16 +29,15 @@
 
 - hosts: K8Smaster
   tasks:
-  # - name: kubeadm init network CIDR
-  #   shell: kubeadm init --pod-network-cidr=10.244.0.0/16
-
+  - name: kubeadm init network CIDR
+    become: true
+    shell: kubeadm init --pod-network-cidr=10.244.0.0/16
   - name: create .kube directory
     become_user: moody
     file:
       path: $HOME/.kube
       state: directory
       mode: 0755
-
   - name: copies admin.conf to user's kube config
     become: true
     copy:
@@ -46,28 +45,19 @@
       # need to change it to be generic (env or something else)
       dest: /home/moody/.kube/config
       remote_src: yes
-
   - name: Apply flannel CNI
     shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-
-  - name: Generate kubeadm token
-    shell: kubeadm token create --print-join-command
-    register: token
-
-
   - name: Print kubeadm join token
     command: kubeadm token create --print-join-command
     register: token
-
   - name: Copy command output to local machine
     become: false
     local_action: copy content="{{ token.stdout_lines[0] }}" dest="./node_join_token" mode=0777
-
   - name: Apply Deployment
     command: kubectl apply -f https://gist.github.com/moodyomar/ed12cd42b527a52159e459e5f04851b3/raw/b537e2d5a37c469e7f9b11bdb093abf7f2021412/deployment.yaml
-
   - name: Apply Ingress Nginx Controller for Azure
     command: kubectl apply -f https://gist.github.com/moodyomar/d615e7bc682a973087cce63e4cce1bc1/raw/7e3686a15962181bca801fea9951503046bca823/ingress-azure.yaml
+
 
 - hosts: K8Sworkers
   become: true
@@ -77,7 +67,6 @@
       src: ./node_join_token
       dest: /tmp/node_join_token
       mode: 0777
-
   - name: Join the master
     command: sh /tmp/node_join_token
 
