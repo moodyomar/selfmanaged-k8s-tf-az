@@ -5,3 +5,8 @@
 .terraform
 *.terraform
 .terraform/
+*.terraform.tfstate.lock.info
+*node_join_token
+*inventory
+
+

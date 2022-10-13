@@ -1,6 +1,5 @@
 - hosts: all
   become: true
-  become_user: root
   tasks:
   - name: Update apt packages
     apt:
@@ -24,21 +23,61 @@
         - kubelet
   - name: Init Net bridge
     shell: echo "net.bridge.bridge-nf-call-iptables=1" | tee -a /etc/sysctl.conf && sysctl -p
+  - name: Aplly custom aliases
+    shell: wget https://gist.github.com/moodyomar/b95f9cc09d90581f19caa9295b874b53/raw/8b09b402ca025104c9b357665f736c348d3566d5/.bash_aliases
 
 
 - hosts: K8Smaster
-  become: true
-  become_user: root
   tasks:
-  - name: kubeadm init network CIDR
-    shell: kubeadm init --pod-network-cidr=10.244.0.0/16
-  - name: init K8S config file
-    shell: mkdir -p $HOME/.kube && cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && chown $(id -u):$(id -g) $HOME/.kube/config
+  # - name: kubeadm init network CIDR
+  #   shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+
+  - name: create .kube directory
+    become_user: moody
+    file:
+      path: $HOME/.kube
+      state: directory
+      mode: 0755
+
+  - name: copies admin.conf to user's kube config
+    become: true
+    copy:
+      src: /etc/kubernetes/admin.conf
+      # need to change it to be generic (env or something else)
+      dest: /home/moody/.kube/config
+      remote_src: yes
+
   - name: Apply flannel CNI
     shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-  - name: copy pwd content to variable
-    shell: pwd
-    register: x
 
-  - debug:
-     msg: "{{ x }}"
+  - name: Generate kubeadm token
+    shell: kubeadm token create --print-join-command
+    register: token
+
+
+  - name: Print kubeadm join token
+    command: kubeadm token create --print-join-command
+    register: token
+
+  - name: Copy command output to local machine
+    become: false
+    local_action: copy content="{{ token.stdout_lines[0] }}" dest="./node_join_token" mode=0777
+
+  - name: Apply Deployment
+    command: kubectl apply -f https://gist.github.com/moodyomar/ed12cd42b527a52159e459e5f04851b3/raw/b537e2d5a37c469e7f9b11bdb093abf7f2021412/deployment.yaml
+
+  - name: Apply Ingress Nginx Controller for Azure
+    command: kubectl apply -f https://gist.github.com/moodyomar/d615e7bc682a973087cce63e4cce1bc1/raw/7e3686a15962181bca801fea9951503046bca823/ingress-azure.yaml
+
+- hosts: K8Sworkers
+  become: true
+  tasks:
+  - name: Copy join token from local to nodes.
+    copy:
+      src: ./node_join_token
+      dest: /tmp/node_join_token
+      mode: 0777
+
+  - name: Join the master
+    command: sh /tmp/node_join_token
+
